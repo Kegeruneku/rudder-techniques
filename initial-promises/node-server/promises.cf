@@ -29,7 +29,7 @@ bundle common rudder_roles
       "rudder_base" string  => "${sys.winprogdir}\Rudder";
       "uuid_file" string => "${rudder_base}\etc\uuid.hive";
 
-    linux|cygwin::
+    !windows::
       "rudder_base" string => "/opt/rudder";
       "uuid_file" string => "${rudder_base}/etc/uuid.hive";
 
@@ -106,14 +106,14 @@ bundle common va
 bundle agent startExecution
 {
   reports:
-    linux|windows::
+    cfengine::
       "@@Common@@log_info@@hasPolicyServer-root@@common-root@@00@@common@@StartRun@@${g.execRun}##${g.uuid}@#Start execution";
 }
 
 bundle agent endExecution
 {
   reports:
-    linux|windows::
+    cfengine::
       "@@Common@@log_info@@hasPolicyServer-root@@common-root@@00@@common@@EndRun@@${g.execRun}##${g.uuid}@#End execution";
 
     no_update::
@@ -223,7 +223,7 @@ bundle agent check_cf_processes
 
   processes:
 
-    linux::
+    !windows::
 
       "${sys.workdir}/bin/cf-serverd"  restart_class => "start_server";
       "${sys.workdir}/bin/cf-execd"    restart_class => "start_executor";
@@ -346,7 +346,7 @@ bundle agent check_cron_daemon
 
   vars:
 
-    (debian|SuSE)::
+    !windows.!redhat::
 
       "cron_bin" string => "/usr/sbin/cron";
       "cron_restartcmd" string => "/etc/init.d/cron restart";
@@ -460,7 +460,7 @@ body agent control
         agentfacility => "LOG_LOCAL6";
 
   # Repository where to put the copy of modified files
-    linux::
+    !windows::
         default_repository => "/var/rudder/modified-files";
 
 }

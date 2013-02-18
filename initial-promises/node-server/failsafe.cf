@@ -43,11 +43,17 @@ bundle common g
       "rudder_sbin" string  => "${rudder_base}\sbin";
       "rudder_dependencies" string => "${rudder_sbin}";
 
-    linux|cygwin::
+    solaris::
+      "rudder_var" string => "/opt/rudder/var";
+
+    !windows.!solaris::
+      "rudder_var" string => "/var/rudder";
+
+    !windows::
       "rudder_base" string => "/opt/rudder";
       "rudder_sbin" string  => "${rudder_base}/sbin";
       "rudder_base_sbin" string  => "${rudder_base}/sbin"; #folder where tools are installed
-      "rudder_dependencies" string => "/var/rudder/tools";
+      "rudder_dependencies" string => "${rudder_var}/tools";
 
 # definition of the node roles
 
@@ -76,13 +82,13 @@ bundle agent init_files
     nova_edition::
       "cfengine_install_path" string => "/usr/local";
     community_edition::
-      "cfengine_install_path" string => "/opt/rudder";
+      "cfengine_install_path" string => "${g.rudder_base}";
 
   classes:
       "missing_key" not => fileexists("${sys.workdir}/ppkeys/localhost.priv");
 
   files:
-    cfengine_community.(linux|cygwin)::
+    cfengine_community.(linux|solaris|cygwin)::
       "${sys.workdir}/bin/${components}"
         perms => u_p("700"),
         copy_from => cp("${cfengine_install_path}/sbin/${components}","localhost"),
@@ -96,7 +102,7 @@ bundle agent init_files
     windows.missing_key.!cygwin::
       "\"${sys.workdir}\bin\cf-key\"";
 
-    linux.missing_key::
+    (solaris|linux).missing_key::
       "${sys.workdir}/bin/cf-key";
 }
 
