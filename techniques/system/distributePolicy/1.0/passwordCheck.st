@@ -67,7 +67,7 @@ bundle agent root_password_check_file
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check rudder-passwords.conf and pgpass files@@None@@${g.execRun}##${g.uuid}@#The Rudder passwords file is present and secure"
         ifvarclass => "file_ok.!file_repaired.!file_error";
@@ -115,7 +115,7 @@ bundle agent root_password_check_ldap
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check LDAP in rudder-webapp.properties@@None@@${g.execRun}##${g.uuid}@#The Rudder Webapp configuration files are OK (checked LDAP password)"
         ifvarclass => "rudder_web_password_integrity_ok.!rudder_web_password_integrity_changed.!rudder_web_password_integrity_failed";
@@ -171,7 +171,7 @@ bundle agent root_password_check_psql
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check SQL in rudder-webapp.properties@@None@@${g.execRun}##${g.uuid}@#The Rudder Webapp configuration files are OK (checked SQL password)"
         ifvarclass => "rudder_web_password_integrity_ok.!rudder_web_password_integrity_changed.!rudder_web_password_integrity_failed";
@@ -252,7 +252,7 @@ bundle agent root_password_check_dav
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check WebDAV credentials@@None@@${g.execRun}##${g.uuid}@#The Rudder WebDAV user and password are OK"
         ifvarclass => "!dav_cant_connect";

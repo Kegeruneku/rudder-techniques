@@ -28,7 +28,7 @@ bundle agent root_integrity_check
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check configuration-repository folder@@None@@${g.execRun}##${g.uuid}@#The ${g.rudder_var}/configuration-repository directory is present"
         ifvarclass => "rudder_integrity_ok.!rudder_integrity_failed";

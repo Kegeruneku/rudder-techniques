@@ -70,7 +70,7 @@ bundle agent generic_alive_check(app)
 
   reports:
 
-    linux::
+    cfengine::
 
       "@@DistributePolicy@@result_success@@&TRACKINGKEY&@@Check ${app} status@@None@@${g.execRun}##${g.uuid}@#The ${site_to_check} web application is running"
         ifvarclass => "site_ok.!site_down_once_${sitename}";
