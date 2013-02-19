@@ -87,7 +87,6 @@ bundle agent update
     community_edition::
       "server_inputs" string => "${server_info.policy_files}/rules/cfengine-community"; #actual directory with promises
 
-
   files:
     !root_server::
       "${client_inputs}"
@@ -101,22 +100,13 @@ bundle agent update
         touch      => "true",
         ifvarclass => "(config|config_ok).!no_update";
 
-    !root_server.(!windows|cygwin)::
+    !root_server::
       "${g.rudder_dependencies}"
         copy_from    => remote_unsecured("${server_info.cfserved}", "${g.rudder_dependencies_origin}"),
         #depth_search => recurse("inf"),
         depth_search => recurse_ignore("inf", @{g.excludedreps}),
         action       => immediate,
         classes      => success("rudder_dependencies_updated", "rudder_dependencies_update_error", "rudder_dependencies_updated_ok");
-
-    !root_server.(windows.!cygwin)::
-      "${g.rudder_sbin}"
-        copy_from    => remote_unsecured("${server_info.cfserved}", "${g.rudder_dependencies_origin}"),
-        #depth_search => recurse("inf"),
-        depth_search => recurse_ignore("inf", @{g.excludedreps}),
-        action       => immediate,
-        classes      => success("rudder_dependencies_updated", "rudder_dependencies_update_error", "rudder_dependencies_updated_ok");
-
 
   processes:
     config.!windows::

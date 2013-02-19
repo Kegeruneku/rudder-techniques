@@ -43,10 +43,19 @@ bundle common g
       "rudder_sbin" string  => "${rudder_base}\sbin";
       "rudder_dependencies" string => "${rudder_sbin}";
 
+      # The time at which the execution started
+      "execRun"                    string => execresult("\"${g.rudder_sbin}\getDate.bat\"", "noshell");
+
+    # The time at which the execution started
+    linux|cygwin::
+      "execRun" string => execresult("/bin/date --rfc-3339=second", "noshell");
+    !linux.!cygwin.!windows::
+      "execRun" string => execresult("/bin/date \"+%Y-%m-%d %T%:z\"", "noshell");
+
     solaris::
       "rudder_var" string => "/opt/rudder/var";
 
-    !windows.!solaris::
+    !solaris.!windows::
       "rudder_var" string => "/var/rudder";
 
     !windows::
@@ -88,7 +97,7 @@ bundle agent init_files
       "missing_key" not => fileexists("${sys.workdir}/ppkeys/localhost.priv");
 
   files:
-    cfengine_community.(linux|solaris|cygwin)::
+    cfengine_community.!windows::
       "${sys.workdir}/bin/${components}"
         perms => u_p("700"),
         copy_from => cp("${cfengine_install_path}/sbin/${components}","localhost"),
@@ -102,7 +111,7 @@ bundle agent init_files
     windows.missing_key.!cygwin::
       "\"${sys.workdir}\bin\cf-key\"";
 
-    (solaris|linux).missing_key::
+    !windows.!cygwin.missing_key::
       "${sys.workdir}/bin/cf-key";
 }
 

@@ -107,14 +107,14 @@ bundle common rudder_roles
 bundle agent startExecution
 {
   reports:
-    linux|windows::
+    cfengine::
       "@@Common@@log_info@@&TRACKINGKEY&@@common@@StartRun@@${g.execRun}##${g.uuid}@#Start execution";
 }
 
 bundle agent endExecution
 {
   reports:
-    linux|windows::
+    cfengine::
       "@@Common@@log_info@@&TRACKINGKEY&@@common@@EndRun@@${g.execRun}##${g.uuid}@#End execution";
 
     no_update::
@@ -239,7 +239,7 @@ bundle agent check_cf_processes
 
   processes:
 
-    linux::
+    !windows::
 
       "${sys.workdir}/bin/cf-serverd"  restart_class => "start_server";
       "${sys.workdir}/bin/cf-execd"    restart_class => "start_executor";
@@ -298,7 +298,7 @@ bundle agent check_cf_processes
 
   reports:
 
-    (linux|windows)::
+    cfengine::
 
       "@@Common@@result_success@@&TRACKINGKEY&@@Process checking@@None@@${g.execRun}##${g.uuid}@#There is an acceptable number of CFEngine processes running on the machine"
       # Here, I can not use the binaries variable as CFEngine will iterate and output two reports, breaking the reporting.
@@ -367,25 +367,25 @@ bundle agent check_log_system
       "syslogd" expression => fileexists("/etc/syslog.conf");
 
   files:
-    linux.rsyslogd::
+    !windows.rsyslogd::
       "/etc/rsyslog.conf"
         edit_line => append_if_no_lines("$IncludeConfig /etc/rsyslog.d/*.conf"),
         comment => "Add the rsyslog.conf.d include if not already present",
         classes => kept_if_else("rsyslog_kept", "rsyslog_repaired" , "rsyslog_failed");
 
-    linux.rsyslogd.!policy_server::
+    !windows.rsyslogd.!policy_server::
       "/etc/rsyslog.d/rudder-agent.conf"
         edit_line => append_if_no_lines("#Rudder log system${const.n}if $syslogfacility-text == 'local6' and $programname startswith 'rudder' then @@${server_info.cfserved}:&SYSLOGPORT&${const.n}if $syslogfacility-text == 'local6' and $programname startswith 'rudder' then ~"),
         create => "true",
         edit_defaults => empty_backup,
         classes => kept_if_else("rsyslog_kept", "rsyslog_repaired" , "rsyslog_failed");
 
-    linux.syslogng.!policy_server::
+    !windows.syslogng.!policy_server::
       "/etc/syslog-ng/syslog-ng.conf"
         edit_line => edit_syslog_conf_file("${syslog_ng_conf}", "${syslog_ng_conf_regex}"),
         classes => kept_if_else("syslog_ng_kept", "syslog_ng_repaired" , "syslog_ng_failed");
 
-    linux.syslogd.!policy_server::
+    !windows.syslogd.!policy_server::
       "/etc/syslog.conf"
         edit_line => fix_syslogd("@${server_info.cfserved}"),
         classes => kept_if_else("syslogd_kept", "syslogd_repaired" , "syslogd_failed");
@@ -411,6 +411,9 @@ bundle agent check_log_system
       "/etc/init.d/syslog"
         args => "restart",
         comment => "Restarting rsyslog after it's been updated";
+
+    solaris.(syslog_ng_repaired|rsyslog_repaired|syslogd_repaired)::
+      "svcadm refresh svc:/system/system-log:default";
 
 
   reports:
@@ -441,7 +444,7 @@ bundle agent check_cron_daemon
 
   vars:
 
-    (debian|SuSE)::
+    !windows.!redhat::
 
       "cron_bin" string => "/usr/sbin/cron";
       "cron_restartcmd" string => "/etc/init.d/cron restart";
@@ -555,7 +558,7 @@ body agent control
         agentfacility => "LOG_LOCAL6";
 
   # Repository where to put the copy of modified files
-    linux::
+    !windows::
         default_repository => "${g.rudder_var}/modified-files";
 
 &if(NOVA)&

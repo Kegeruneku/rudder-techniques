@@ -46,15 +46,27 @@ bundle common g
       "rudder_var"                 string => "${sys.winprogdir}\Rudder\var";
       "rudder_sbin"                string => "${rudder_base}\sbin";
       "rudder_dependencies"        string => "${rudder_sbin}";
+
+      # The time at which the execution started
       "execRun"                    string => execresult("\"${g.rudder_sbin}\getDate.bat\"", "noshell");
 
+    # The time at which the execution started
     linux|cygwin::
+      "execRun" string => execresult("/bin/date --rfc-3339=second", "noshell");
+    !linux.!cygwin.!windows::
+      "execRun" string => execresult("/bin/date \"+%Y-%m-%d %T%:z\"", "noshell");
+
+    solaris::
+      "rudder_var" string => "/opt/rudder/var";
+
+    !solaris.!windows::
+      "rudder_var" string => "/var/rudder";
+
+    !windows::
       "rudder_base"                string => "/opt/rudder";
-      "rudder_var"                 string => "/var/rudder";
       "rudder_sbin"                string => "${rudder_base}/sbin";
       "rudder_base_sbin"           string => "${rudder_base}/sbin"; #folder where tools are installed
-      "rudder_dependencies"        string => "/var/rudder/tools";
-      "execRun"                    string => execresult("/bin/date --rfc-3339=second", "noshell");
+      "rudder_dependencies"        string => "${rudder_var}/tools";
 
 
 # definition of the node roles
@@ -83,13 +95,13 @@ bundle agent init_files
     nova_edition::
       "cfengine_install_path" string => "/usr/local";
     community_edition::
-      "cfengine_install_path" string => "/opt/rudder";
+      "cfengine_install_path" string => "${g.rudder_base}";
 
   classes:
       "missing_key" not => fileexists("${sys.workdir}/ppkeys/localhost.priv");
 
   files:
-    cfengine_community.(linux|cygwin)::
+    cfengine_community.!windows::
       "${sys.workdir}/bin/${components}"
         perms     => u_p("700"),
         copy_from => cp("${cfengine_install_path}/sbin/${components}","localhost"),
@@ -103,7 +115,7 @@ bundle agent init_files
     windows.missing_key.!cygwin::
       "\"${sys.workdir}\bin\cf-key\"";
 
-    linux.missing_key::
+    !windows.!cygwin.missing_key::
       "${sys.workdir}/bin/cf-key";
 }
 
